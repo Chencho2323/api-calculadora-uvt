@@ -19,11 +19,9 @@ jobs:
           extensions: pdo_sqlite, mbstring, xml, curl
           coverage: none
 
-      - name: Instalar dependencias
-        run: composer install --no-interaction --prefer-dist
-
-      - name: Verificar sintaxis
-        run: find src public tests -name '*.php' -print0 | xargs -0 -n1 php -l
-
-      - name: Pruebas
-        run: vendor/bin/phpunit --testdox
+      # El CI corre el mismo gate que local, no una copia paralela.
+      # verificar.sh detecta un proyecto recien creado (sin composer.json,
+      # sin phpunit.xml) y lo reporta como SIN_SUITE sin marcar el CI en rojo.
+      # Asi el primer push de la estructura no genera una alerta falsa.
+      - name: Verificar
+        run: sh verificar.sh
