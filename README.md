@@ -33,6 +33,50 @@ La aplicacion expone su funcionalidad por linea de comandos o por HTTP, segun
 el caso. Los ejemplos concretos estan en `docs/` o en el `README` ampliado de
 cada version.
 
+### Conversion entre pesos y UVT
+
+```php
+use InheritDevs\Uvt\ConversorUvt;
+
+ConversorUvt::aUvt(1000000, 2026);   // 19.09 UVT
+ConversorUvt::aPesos(19.09, 2026);   // 1000000
+ConversorUvt::desglose(1000000, 2026);
+```
+
+### Retencion de renta por rangos
+
+Aplica la tabla del articulo 383 del Estatuto Tributario sobre el pago gravable
+del mes, expresado en UVT.
+
+```php
+use InheritDevs\Uvt\RetencionRenta;
+
+RetencionRenta::enPesos(10474800, 2026);   // 1256976 (200 UVT de 2026)
+RetencionRenta::enUvt(200);                // 24.0 UVT
+RetencionRenta::desglose(10474800, 2026);  // tramo, tarifa y acumulado
+```
+
+Los tramos son los de la norma: hasta 95 UVT no hay retencion, y de ahi en
+adelante el pago paga el acumulado del tramo mas la tarifa marginal sobre el
+excedente. En los bordes hay saltos hacia abajo porque la tabla publica el
+acumulado redondeado; el codigo los reproduce tal cual.
+
+### Retencion de IVA
+
+Se calcula sobre el IVA facturado, con base minima de 27 UVT por operacion.
+
+```php
+use InheritDevs\Uvt\RetencionIva;
+
+RetencionIva::enPesos(20000000, 'servicios', 2026);                        // 570000
+RetencionIva::enPesos(20000000, 'servicios_entre_responsables', 2026);     // 380000
+RetencionIva::enPesos(1000000, 'servicios', 2026);                         // 0, no alcanza 27 UVT
+RetencionIva::enPesos(1000000, 'servicios', 2026, sinBaseMinima: true);    // 28500
+```
+
+Conceptos: `servicios` (15%), `servicios_entre_responsables` (10%) y
+`sin_retencion` (0%).
+
 ## Pruebas
 
 ```bash
